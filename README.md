@@ -2,8 +2,9 @@
 
 Handy C# / Unity extension methods — strings, collections, arrays, dictionaries, and more.
 
-A small, dependency-free scaffold of `static` extension classes you can drop into any
-Unity 6000.0+ project and grow over time.
+A small, focused set of `static` extension classes you can drop into any Unity 6000.0+
+project and grow over time. Its only assembly reference is `UnityEngine.UI` (a default
+Unity package), used by `GameObjectExtensions.RefreshLayout`.
 
 ## Installation
 
@@ -14,7 +15,7 @@ Install via the Unity Package Manager using a Git URL pinned to a release tag:
 3. Enter:
 
    ```
-   https://github.com/knabsiraphop/kidzdev-unity-extensions.git#v0.2.0
+   https://github.com/knabsiraphop/kidzdev-unity-extensions.git#v1.0.0
    ```
 
 Or add it directly to `Packages/manifest.json`:
@@ -22,18 +23,21 @@ Or add it directly to `Packages/manifest.json`:
 ```json
 {
   "dependencies": {
-    "com.kidzdev.unity.extensions": "https://github.com/knabsiraphop/kidzdev-unity-extensions.git#v0.2.0"
+    "com.kidzdev.unity.extensions": "https://github.com/knabsiraphop/kidzdev-unity-extensions.git#v1.0.0"
   }
 }
 ```
 
 ## Features
 
-- **`StringExtensions`** — `IsNullOrWhiteSpace()`, `Truncate(int, ellipsis)`, `Or(fallback)`, `EqualsIgnoreCase()`, `ContainsIgnoreCase()`, `ToTitleCase()`, `StripRichText()`, `ToColor()` / `TryToColor()`
-- **`CollectionExtensions`** — `IsNullOrEmpty<T>()`, `GetRandom<T>()`, `GetRandomOrDefault<T>()`, `Shuffle<T>()`
-- **`ArrayExtensions`** — `IsNullOrEmpty<T>()`, `IsValidIndex<T>(int)`
-- **`DictionaryExtensions`** — `GetOrAdd<TKey, TValue>(...)`
-- **`GameObjectExtensions`** — `SetLayerRecursively(int)`, `GetOrAddComponent<T>()`, `DestroyChildren()`
+- **`StringExtensions`** — `Truncate(int, ellipsis)`, `Or(fallback)`, `EqualsIgnoreCase()`, `ContainsIgnoreCase()`, `StartsWithIgnoreCase()` / `EndsWithIgnoreCase()`, `ToTitleCase()`, `StripRichText()`, `ToColor()` / `TryToColor()`, `TryToInt()` / `ToIntOrDefault()`, `TryToFloat()` / `ToFloatOrDefault()`, `GetStableHashCode()`
+- **`CollectionExtensions`** — `IsNullOrEmpty<T>()`, `IsValidIndex<T>(int)`, `GetRandom<T>()`, `GetRandomOrDefault<T>()`, `Shuffle<T>()`, `Swap<T>(int, int)`, `PopRandom<T>()`, `MinBy<T, TKey>()` / `MaxBy<T, TKey>()`
+- **`DictionaryExtensions`** — `GetOrAdd<TKey, TValue>(...)`, `Increment<TKey>()`, `AddOrUpdate<TKey, TValue>(...)`
+- **`IntExtensions`** — `Wrap(length)`, `IsBetween(min, max)`, `ToThousandsString()`, `ToOrdinal()`
+- **`FloatExtensions`** — `Approximately()`, `IsZero()`, `Clamp01()`, `Remap(...)`, `Snap(step)`, `RoundToInt()` / `FloorToInt()` / `CeilToInt()`, `IsBetween()`, `ToThousandsString(decimals)`
+- **`DoubleExtensions`** — `Clamp01()`, `Remap(...)`, `IsBetween()`, `ToThousandsString(decimals)`
+- **`LongExtensions`** — `IsBetween()`, `ToThousandsString()`, `ToFileSizeString()`
+- **`GameObjectExtensions`** — `SetLayerRecursively(int)`, `GetOrAddComponent<T>()`, `DestroyChildren()`, `DestroySelf()`, `IsInLayerMask(LayerMask)`, `GetPath()`, `RefreshLayout()`
 
 All methods live in the `KidzDev.Unity.Extensions` namespace and the auto-referenced
 `KidzDev.Unity.Extensions` assembly, so they are available everywhere without extra `using`s
@@ -45,8 +49,8 @@ A **Demo** sample ships with the package. Import it from the Package Manager:
 
 **Package Manager > KidzDev Extensions > Samples > Demo > Import**
 
-It adds an `ExtensionsDemo` MonoBehaviour that calls a few of the methods and logs the
-results to the Console.
+It includes a `Demo.unity` scene with an `ExtensionsDemo` MonoBehaviour that exercises every
+extension method and reports each result to the Console and an on-screen readout.
 
 ## License
 
