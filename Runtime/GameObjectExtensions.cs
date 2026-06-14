@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KidzDev.Extensions
+namespace KidzDev.Unity.Extensions
 {
     /// <summary>
     /// Extension methods for <see cref="GameObject"/>.

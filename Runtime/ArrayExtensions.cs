@@ -1,4 +1,4 @@
-namespace KidzDev.Extensions
+namespace KidzDev.Unity.Extensions
 {
     /// <summary>
     /// Extension methods for arrays.

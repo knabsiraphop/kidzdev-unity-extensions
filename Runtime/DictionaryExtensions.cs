@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace KidzDev.Extensions
+namespace KidzDev.Unity.Extensions
 {
     /// <summary>
     /// Extension methods for <see cref="IDictionary{TKey, TValue}"/>.

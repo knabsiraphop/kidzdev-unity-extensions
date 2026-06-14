@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using KidzDev.Extensions;
+using KidzDev.Unity.Extensions;
 using UnityEngine;
 
-namespace KidzDev.Extensions.Samples
+namespace KidzDev.Unity.Extensions.Samples
 {
     /// <summary>
     /// Minimal demo that exercises a few of the extension methods and logs the results.

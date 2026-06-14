@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace KidzDev.Extensions
+namespace KidzDev.Unity.Extensions
 {
     /// <summary>
     /// Extension methods for collections (<see cref="IEnumerable{T}"/> and <see cref="IList{T}"/>).

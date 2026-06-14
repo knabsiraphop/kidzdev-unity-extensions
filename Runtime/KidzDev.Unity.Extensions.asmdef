@@ -1,6 +1,6 @@
 {
-  "name": "KidzDev.Extensions",
-  "rootNamespace": "KidzDev.Extensions",
+  "name": "KidzDev.Unity.Extensions",
+  "rootNamespace": "KidzDev.Unity.Extensions",
   "references": [],
   "includePlatforms": [],
   "excludePlatforms": [],

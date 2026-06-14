@@ -1,4 +1,4 @@
-# KidzDev Extensions
+# KidzDev Unity Extensions
 
 Handy C# / Unity extension methods — strings, collections, arrays, dictionaries, and more.
 
@@ -14,7 +14,7 @@ Install via the Unity Package Manager using a Git URL pinned to a release tag:
 3. Enter:
 
    ```
-   https://github.com/knabsiraphop/kidzdev-extensions.git#v0.1.0
+   https://github.com/knabsiraphop/kidzdev-unity-extensions.git#v0.1.0
    ```
 
 Or add it directly to `Packages/manifest.json`:
@@ -22,7 +22,7 @@ Or add it directly to `Packages/manifest.json`:
 ```json
 {
   "dependencies": {
-    "com.kidzdev.extensions": "https://github.com/knabsiraphop/kidzdev-extensions.git#v0.1.0"
+    "com.kidzdev.unity.extensions": "https://github.com/knabsiraphop/kidzdev-unity-extensions.git#v0.1.0"
   }
 }
 ```
@@ -35,8 +35,8 @@ Or add it directly to `Packages/manifest.json`:
 - **`DictionaryExtensions`** — `GetOrAdd<TKey, TValue>(...)`
 - **`GameObjectExtensions`** — `SetLayerRecursively(int)`, `GetOrAddComponent<T>()`
 
-All methods live in the `KidzDev.Extensions` namespace and the auto-referenced
-`KidzDev.Extensions` assembly, so they are available everywhere without extra `using`s
+All methods live in the `KidzDev.Unity.Extensions` namespace and the auto-referenced
+`KidzDev.Unity.Extensions` assembly, so they are available everywhere without extra `using`s
 beyond the namespace import.
 
 ## Sample
