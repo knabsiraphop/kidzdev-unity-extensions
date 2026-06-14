@@ -12,12 +12,6 @@ namespace KidzDev.Unity.Extensions
     {
         private static readonly Regex RichTextTagPattern = new Regex("<[^>]*>");
 
-        /// <summary>Returns <c>true</c> when the string is <c>null</c>, empty, or only whitespace.</summary>
-        public static bool IsNullOrWhiteSpace(this string value)
-        {
-            return string.IsNullOrWhiteSpace(value);
-        }
-
         /// <summary>
         /// Truncates the string so its length never exceeds <paramref name="maxLength"/>, appending
         /// <paramref name="ellipsis"/> when characters were dropped. Returns the original value when it
@@ -65,6 +59,32 @@ namespace KidzDev.Unity.Extensions
         }
 
         /// <summary>
+        /// Returns <c>true</c> when this string starts with <paramref name="prefix"/>, compared ordinally
+        /// and case-insensitively — avoids the culture-sensitive default of <see cref="string.StartsWith(string)"/>.
+        /// <c>null</c> on either side returns <c>false</c>.
+        /// </summary>
+        public static bool StartsWithIgnoreCase(this string value, string prefix)
+        {
+            if (value == null || prefix == null)
+                return false;
+
+            return value.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Returns <c>true</c> when this string ends with <paramref name="suffix"/>, compared ordinally
+        /// and case-insensitively — avoids the culture-sensitive default of <see cref="string.EndsWith(string)"/>.
+        /// <c>null</c> on either side returns <c>false</c>.
+        /// </summary>
+        public static bool EndsWithIgnoreCase(this string value, string suffix)
+        {
+            if (value == null || suffix == null)
+                return false;
+
+            return value.EndsWith(suffix, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
         /// Converts the string to Title Case using the invariant culture. The input is lower-cased first,
         /// so already-upper-case words (e.g. "iOS") are normalised rather than left untouched.
         /// </summary>
@@ -105,6 +125,66 @@ namespace KidzDev.Unity.Extensions
         public static Color ToColor(this string value, Color fallback = default)
         {
             return ColorUtility.TryParseHtmlString(value, out var color) ? color : fallback;
+        }
+
+        /// <summary>
+        /// Parses an integer using the invariant culture (so it is locale-independent). Returns
+        /// <c>true</c> and the parsed value on success; otherwise <c>false</c> with <paramref name="result"/> set to 0.
+        /// </summary>
+        public static bool TryToInt(this string value, out int result)
+        {
+            return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out result);
+        }
+
+        /// <summary>
+        /// Parses an integer using the invariant culture, returning <paramref name="fallback"/> when the
+        /// string is not a valid integer. Locale-independent, unlike <see cref="int.Parse(string)"/>.
+        /// </summary>
+        public static int ToIntOrDefault(this string value, int fallback = 0)
+        {
+            return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result) ? result : fallback;
+        }
+
+        /// <summary>
+        /// Parses a float using the invariant culture (so <c>"1.5"</c> parses regardless of the machine's
+        /// decimal separator). Returns <c>true</c> and the parsed value on success; otherwise <c>false</c>
+        /// with <paramref name="result"/> set to 0.
+        /// </summary>
+        public static bool TryToFloat(this string value, out float result)
+        {
+            return float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out result);
+        }
+
+        /// <summary>
+        /// Parses a float using the invariant culture, returning <paramref name="fallback"/> when the string
+        /// is not a valid number. Avoids the locale decimal-separator bug of <see cref="float.Parse(string)"/>.
+        /// </summary>
+        public static float ToFloatOrDefault(this string value, float fallback = 0f)
+        {
+            return float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : fallback;
+        }
+
+        /// <summary>
+        /// A deterministic 32-bit hash (FNV-1a) that is stable across runs and platforms — unlike
+        /// <see cref="string.GetHashCode()"/>, which is randomised per process. Safe for save keys, stable
+        /// IDs, and content addressing. Returns 0 for <c>null</c>.
+        /// </summary>
+        public static int GetStableHashCode(this string value)
+        {
+            if (value == null)
+                return 0;
+
+            unchecked
+            {
+                const uint offsetBasis = 2166136261;
+                const uint prime = 16777619;
+
+                uint hash = offsetBasis;
+                for (int i = 0; i < value.Length; i++)
+                    hash = (hash ^ value[i]) * prime;
+
+                return (int)hash;
+            }
         }
     }
 }

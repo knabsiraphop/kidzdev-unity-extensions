@@ -42,6 +42,34 @@ namespace KidzDev.Unity.Extensions
             return created;
         }
 
-        // TODO: add more
+        /// <summary>
+        /// Adds <paramref name="amount"/> to the integer stored for <paramref name="key"/> (treating a missing
+        /// key as 0) and returns the new total. The tally / counter pattern.
+        /// </summary>
+        public static int Increment<TKey>(this IDictionary<TKey, int> dictionary, TKey key, int amount = 1)
+        {
+            dictionary.TryGetValue(key, out var current);
+            int updated = current + amount;
+            dictionary[key] = updated;
+            return updated;
+        }
+
+        /// <summary>
+        /// Inserts <paramref name="addValue"/> when <paramref name="key"/> is absent; otherwise replaces the
+        /// existing value with the result of <paramref name="updateFactory"/>. Returns the stored value.
+        /// </summary>
+        public static TValue AddOrUpdate<TKey, TValue>(
+            this IDictionary<TKey, TValue> dictionary,
+            TKey key,
+            TValue addValue,
+            Func<TKey, TValue, TValue> updateFactory)
+        {
+            TValue value = dictionary.TryGetValue(key, out var existing)
+                ? updateFactory(key, existing)
+                : addValue;
+
+            dictionary[key] = value;
+            return value;
+        }
     }
 }
