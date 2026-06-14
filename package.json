@@ -1,6 +1,6 @@
 {
   "name": "com.kidzdev.unity.extensions",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "KidzDev Unity Extensions",
   "description": "Handy C# / Unity extension methods — strings, collections, arrays, dictionaries, and more.",
   "unity": "6000.0",

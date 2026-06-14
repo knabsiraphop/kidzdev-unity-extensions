@@ -5,7 +5,7 @@ extension methods shipped in **KidzDev Extensions** and writes the results to th
 
 ## What it shows
 
-- `string.Truncate(int)` and `string.IsNullOrEmpty()`
+- `string.Truncate(int)`, `string.Or(fallback)`, and `string.EqualsIgnoreCase()`
 - `array.IsNullOrEmpty()` and `IList<T>.GetRandom()`
 - `IDictionary<TKey, TValue>.GetOrAdd(key, factory)`
 - `GameObject.SetLayerRecursively(int)`

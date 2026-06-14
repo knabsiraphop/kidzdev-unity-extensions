@@ -15,12 +15,17 @@ namespace KidzDev.Unity.Extensions.Samples
             // StringExtensions
             string title = "KidzDev Extensions Demo";
             Debug.Log($"Truncate(8): \"{title.Truncate(8)}\"");
-            Debug.Log($"\"\".IsNullOrEmpty(): {string.Empty.IsNullOrEmpty()}");
+            Debug.Log($"Or(fallback): \"{string.Empty.Or("(empty)")}\"");
+            Debug.Log($"EqualsIgnoreCase: {"KIDZDEV".EqualsIgnoreCase("kidzdev")}");
 
             // ArrayExtensions / CollectionExtensions
             var numbers = new[] { 1, 2, 3, 4, 5 };
             Debug.Log($"Array IsNullOrEmpty(): {numbers.IsNullOrEmpty()}");
             Debug.Log($"GetRandom(): {numbers.GetRandom()}");
+
+            var deck = new List<int> { 1, 2, 3, 4, 5 };
+            deck.Shuffle();
+            Debug.Log($"Shuffle(): [{string.Join(", ", deck)}]");
 
             // DictionaryExtensions
             var scores = new Dictionary<string, int>();

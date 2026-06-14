@@ -27,6 +27,23 @@ namespace KidzDev.Unity.Extensions
                 : gameObject.AddComponent<T>();
         }
 
-        // TODO: add more
+        /// <summary>
+        /// Destroys every child of this GameObject. Uses <c>DestroyImmediate</c> outside of play mode
+        /// so it also works from editor tooling, and <c>Destroy</c> at runtime.
+        /// </summary>
+        public static void DestroyChildren(this GameObject gameObject)
+        {
+            Transform transform = gameObject.transform;
+
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                GameObject child = transform.GetChild(i).gameObject;
+
+                if (Application.isPlaying)
+                    Object.Destroy(child);
+                else
+                    Object.DestroyImmediate(child);
+            }
+        }
     }
 }
