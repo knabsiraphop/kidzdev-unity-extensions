@@ -15,7 +15,7 @@ Install via the Unity Package Manager using a Git URL pinned to a release tag:
 3. Enter:
 
    ```
-   https://github.com/knabsiraphop/kidzdev-unity-extensions.git#v1.0.0
+   https://github.com/knabsiraphop/kidzdev-unity-extensions.git#v1.1.0
    ```
 
 Or add it directly to `Packages/manifest.json`:
@@ -23,7 +23,7 @@ Or add it directly to `Packages/manifest.json`:
 ```json
 {
   "dependencies": {
-    "com.kidzdev.unity.extensions": "https://github.com/knabsiraphop/kidzdev-unity-extensions.git#v1.0.0"
+    "com.kidzdev.unity.extensions": "https://github.com/knabsiraphop/kidzdev-unity-extensions.git#v1.1.0"
   }
 }
 ```

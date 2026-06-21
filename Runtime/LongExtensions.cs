@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 
 namespace KidzDev.Unity.Extensions
@@ -50,6 +51,26 @@ namespace KidzDev.Unity.Extensions
                 : size.ToString("0.##", CultureInfo.InvariantCulture);
 
             return (negative ? "-" : string.Empty) + formatted + " " + units[unit];
+        }
+
+        /// <summary>
+        /// Converts a Unix timestamp (seconds since 1970-01-01T00:00:00Z) to a
+        /// <see cref="DateTimeOffset"/> in UTC. The reverse — <c>dto.ToUnixTimeSeconds()</c>
+        /// — is already a first-class BCL method on <see cref="DateTimeOffset"/>.
+        /// </summary>
+        public static DateTimeOffset ToDateTimeOffsetFromUnixSeconds(this long seconds)
+        {
+            return DateTimeOffset.FromUnixTimeSeconds(seconds);
+        }
+
+        /// <summary>
+        /// Converts a Unix timestamp (milliseconds since 1970-01-01T00:00:00Z) to a
+        /// <see cref="DateTimeOffset"/> in UTC. The reverse — <c>dto.ToUnixTimeMilliseconds()</c>
+        /// — is already a first-class BCL method on <see cref="DateTimeOffset"/>.
+        /// </summary>
+        public static DateTimeOffset ToDateTimeOffsetFromUnixMilliseconds(this long milliseconds)
+        {
+            return DateTimeOffset.FromUnixTimeMilliseconds(milliseconds);
         }
     }
 }

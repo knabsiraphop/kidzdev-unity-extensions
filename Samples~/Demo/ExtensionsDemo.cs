@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using KidzDev.Unity.Extensions;
 using UnityEngine;
 
@@ -12,8 +14,10 @@ namespace KidzDev.Unity.Extensions.Samples
     /// </summary>
     public class ExtensionsDemo : MonoBehaviour
     {
-        private readonly List<string> _output = new List<string>();
+        private readonly List<string> _output      = new List<string>();
+        private readonly List<string> _outputRight = new List<string>();
         private Vector2 _scroll;
+        private Vector2 _scrollRight;
 
         private IEnumerator Start()
         {
@@ -24,6 +28,8 @@ namespace KidzDev.Unity.Extensions.Samples
             FloatSamples();
             DoubleSamples();
             LongSamples();
+            DateTimeOffsetSamples();
+            TimeSpanSamples();
             yield return GameObjectSamples();
         }
 
@@ -166,6 +172,83 @@ namespace KidzDev.Unity.Extensions.Samples
             Log("9876543210L.ToThousandsString()", 9876543210L.ToThousandsString());
             Log("1572864L.ToFileSizeString()", 1572864L.ToFileSizeString());
             Log("(5L<<30).ToFileSizeString()", (5L << 30).ToFileSizeString());
+            Log("1_750_000_000L.ToDateTimeOffsetFromUnixSeconds()", 1_750_000_000L.ToDateTimeOffsetFromUnixSeconds().ToIso8601String());
+            Log("1_750_000_000_000L.ToDateTimeOffsetFromUnixMilliseconds()", 1_750_000_000_000L.ToDateTimeOffsetFromUnixMilliseconds().ToIso8601String());
+        }
+
+        // ── DateTimeOffset ──────────────────────────────────────────────────
+
+        private void DateTimeOffsetSamples()
+        {
+            SectionRight("DateTimeOffsetExtensions");
+
+            // Fixed instant: 2026-06-21 14:30:00 UTC+7
+            var now = new DateTimeOffset(2026, 6, 21, 14, 30, 0, TimeSpan.FromHours(7));
+            var sameDay = new DateTimeOffset(2026, 6, 21, 23, 59, 0, TimeSpan.FromHours(7));
+            var nextDay = new DateTimeOffset(2026, 6, 22, 0, 0, 0, TimeSpan.FromHours(7));
+            var eventStart = new DateTimeOffset(2026, 6, 20, 0, 0, 0, TimeSpan.FromHours(7));
+            var eventEnd = new DateTimeOffset(2026, 6, 25, 0, 0, 0, TimeSpan.FromHours(7));
+
+            LogRight("now.IsBetween(eventStart, eventEnd)", now.IsBetween(eventStart, eventEnd));
+            LogRight("now.IsSameDay(sameDay)", now.IsSameDay(sameDay));
+            LogRight("now.IsSameDay(nextDay)", now.IsSameDay(nextDay));
+            LogRight("now.StartOfDay()", now.StartOfDay().ToIso8601String());
+            LogRight("now.EndOfDay()", now.EndOfDay().ToIso8601String());
+            LogRight("now.StartOfWeek(Monday)", now.StartOfWeek(DayOfWeek.Monday).ToIso8601String());
+            LogRight("now.StartOfWeek(Sunday)", now.StartOfWeek(DayOfWeek.Sunday).ToIso8601String());
+            LogRight("now.StartOfMonth()", now.StartOfMonth().ToIso8601String());
+            LogRight("now.EndOfMonth()", now.EndOfMonth().ToIso8601String());
+            LogRight("now.ToIso8601String()", now.ToIso8601String());
+
+            // Relative time — use live UtcNow so results are meaningful
+            var utcNow = DateTimeOffset.UtcNow;
+            var fiveMinAgo  = utcNow.AddMinutes(-5);
+            var tomorrow    = utcNow.AddDays(1);
+            var twoHrsLater = utcNow.AddHours(2);
+
+            SectionRight("— Relative");
+            LogRight("(UtcNow-5m).ToRelativeString()", fiveMinAgo.ToRelativeString());
+            LogRight("tomorrow.ToRelativeString()", tomorrow.ToRelativeString());
+            LogRight("(UtcNow+2h).ToRelativeString()", twoHrsLater.ToRelativeString());
+
+            var rt = fiveMinAgo.ToRelativeTime();
+            LogRight("(UtcNow-5m) rt.Unit", rt.Unit);
+            LogRight("(UtcNow-5m) rt.Count", rt.Count);
+            LogRight("(UtcNow-5m) rt.IsFuture", rt.IsFuture);
+
+            // Friendly absolute — invariant vs culture-specific
+            SectionRight("— Friendly date");
+            LogRight("now.ToFriendlyDateString()", now.ToFriendlyDateString());
+            LogRight("now.ToFriendlyDateString(th-TH)", now.ToFriendlyDateString(new CultureInfo("th-TH")));
+            LogRight("now.ToFriendlyDateTimeString()", now.ToFriendlyDateTimeString());
+        }
+
+        // ── TimeSpan ────────────────────────────────────────────────────────
+
+        private void TimeSpanSamples()
+        {
+            SectionRight("TimeSpanExtensions");
+
+            var overHour   = TimeSpan.FromSeconds(3909);   // 1h 5m 9s
+            var underHour  = TimeSpan.FromSeconds(150);    // 2m 30s
+            var twoAndHalf = new TimeSpan(2, 3, 30, 0);   // 2d 3h 30m
+            var negative   = TimeSpan.FromMinutes(-90);
+
+            SectionRight("— Clock");
+            LogRight("(1h 5m 9s).ToClockString()", overHour.ToClockString());
+            LogRight("(2m 30s).ToClockString()", underHour.ToClockString());
+            LogRight("Zero.ToClockString()", TimeSpan.Zero.ToClockString());
+
+            SectionRight("— Compact");
+            LogRight("(2d 3h 30m).ToCompactString()", twoAndHalf.ToCompactString());
+            LogRight("(1h 5m 9s).ToCompactString()", overHour.ToCompactString());
+            LogRight("(2m 30s).ToCompactString()", underHour.ToCompactString());
+            LogRight("Zero.ToCompactString()", TimeSpan.Zero.ToCompactString());
+            LogRight("(-90m).ToCompactString()", negative.ToCompactString());
+
+            SectionRight("— Range");
+            LogRight("(2m 30s).Clamp(1m, 5m)", underHour.Clamp(TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(5)).ToCompactString());
+            LogRight("(2m 30s).IsBetween(1m, 5m)", underHour.IsBetween(TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(5)));
         }
 
         // ── GameObject ──────────────────────────────────────────────────────
@@ -216,6 +299,12 @@ namespace KidzDev.Unity.Extensions.Samples
             _output.Add("── " + name + " ──");
         }
 
+        private void SectionRight(string name)
+        {
+            _outputRight.Add(string.Empty);
+            _outputRight.Add("── " + name + " ──");
+        }
+
         private void Log(string label, object value)
         {
             string line = $"{label} = {value}";
@@ -223,13 +312,34 @@ namespace KidzDev.Unity.Extensions.Samples
             Debug.Log("[ExtensionsDemo] " + line);
         }
 
+        private void LogRight(string label, object value)
+        {
+            string line = $"{label} = {value}";
+            _outputRight.Add(line);
+            Debug.Log("[ExtensionsDemo] " + line);
+        }
+
         private void OnGUI()
         {
-            float width = Mathf.Min(480f, Screen.width - 20f);
-            GUILayout.BeginArea(new Rect(10f, 10f, width, Screen.height - 20f), GUI.skin.box);
-            GUILayout.Label("KidzDev Extensions Demo — results (also in Console)");
+            const float padding  = 10f;
+            const float colWidth = 480f;
+            float height = Screen.height - padding * 2f;
+
+            // Left column — String / Collection / Dictionary / Int / Float / Double / Long / GameObject
+            GUILayout.BeginArea(new Rect(padding, padding, colWidth, height), GUI.skin.box);
+            GUILayout.Label("◀  Core extensions  (String · Collection · Dictionary · Int · Float · Double · Long · GameObject)");
             _scroll = GUILayout.BeginScrollView(_scroll);
             foreach (string line in _output)
+                GUILayout.Label(line);
+            GUILayout.EndScrollView();
+            GUILayout.EndArea();
+
+            // Right column — DateTimeOffset / TimeSpan
+            float rightX = padding + colWidth + padding;
+            GUILayout.BeginArea(new Rect(rightX, padding, colWidth, height), GUI.skin.box);
+            GUILayout.Label("▶  Date & time extensions  (DateTimeOffset · TimeSpan)");
+            _scrollRight = GUILayout.BeginScrollView(_scrollRight);
+            foreach (string line in _outputRight)
                 GUILayout.Label(line);
             GUILayout.EndScrollView();
             GUILayout.EndArea();

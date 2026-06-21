@@ -5,6 +5,36 @@ All notable changes to this package are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-06-21
+
+### Added
+
+- `DateTimeOffsetExtensions` (new class): `IsBetween(start, end)` (offset-aware, normalised to UTC),
+  `IsSameDay(other)` (calendar-date comparison using each value's own offset), `StartOfDay()`,
+  `EndOfDay()`, `StartOfWeek(firstDayOfWeek)` (defaults to Monday), `StartOfMonth()`, `EndOfMonth()`
+  (all preserve the value's UTC offset), `ToIso8601String()` (round-trippable `"o"` format, invariant
+  culture), `ToRelativeTime(now?)` (returns a locale-agnostic `RelativeTime` struct for use with a
+  localisation system), `ToRelativeString(now?)` (English convenience string), `ToFriendlyDateString(provider?)`
+  (`"MMM d, yyyy"`), and `ToFriendlyDateTimeString(provider?)` (`"MMM d, yyyy HH:mm"`).
+- `RelativeTime` struct (new type): locale-agnostic relative-time result produced by
+  `DateTimeOffsetExtensions.ToRelativeTime`. Fields: `Unit` (`RelativeTimeUnit` enum), `Count` (int),
+  `IsFuture` (bool). `ToString()` provides an English convenience string; use the fields with your own
+  localisation system to build culture-specific strings. `RelativeTime.FromDelta(TimeSpan)` is the
+  factory used internally.
+- `RelativeTimeUnit` enum (new type): `JustNow`, `Seconds`, `Minutes`, `Hours`, `Days`, `Weeks`,
+  `Months`, `Years`.
+- `TimeSpanExtensions` (new class): `ToClockString()` (digital-clock format `H:mm:ss` / `m:ss`,
+  negative treated as zero, days roll into hours), `ToCompactString()` (two most-significant non-zero
+  units from d/h/m/s, e.g. `"2d 3h"`, `"1h 30m"`, negative durations prefixed with `"-"`),
+  `Clamp(min, max)`, and `IsBetween(min, max)`.
+- `LongExtensions`: `ToDateTimeOffsetFromUnixSeconds(this long seconds)` and
+  `ToDateTimeOffsetFromUnixMilliseconds(this long milliseconds)` — convert Unix timestamps to
+  `DateTimeOffset` in UTC (the reverse `dto.ToUnixTimeSeconds()` / `dto.ToUnixTimeMilliseconds()` are
+  already first-class BCL methods).
+- Demo sample updated with a two-column on-screen readout: the existing core extensions remain in the
+  left column; the new `DateTimeOffsetExtensions` and `TimeSpanExtensions` samples appear in a second
+  right-hand column.
+
 ## [1.0.0] - 2026-06-14
 
 ### Added
