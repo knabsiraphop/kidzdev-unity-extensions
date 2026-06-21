@@ -174,53 +174,58 @@ string text = rt.Unit == RelativeTimeUnit.JustNow
 // key "time_Minutes_past" = "{0} minutes ago"
 ```
 
-#### Thai localization example
+#### Thai example — pure C# (`System.Globalization` only)
 
-Add these keys to your Thai (`th`) localization table:
+**Absolute dates** — `CultureInfo` does everything: Thai month abbreviations and Buddhist Era (BE) year (+543) are built into the BCL:
 
-```json
+```csharp
+using System.Globalization;
+
+var thai = new CultureInfo("th-TH");
+
+eventTime.ToFriendlyDateString(thai);      // "มิ.ย. 21, 2569"
+eventTime.ToFriendlyDateTimeString(thai);  // "มิ.ย. 21, 2569 14:30"
+```
+
+**Relative time** — `CultureInfo` has no concept of "5 minutes ago" phrasing in any language, so you supply the Thai strings yourself. No localization package needed — a small static helper is enough:
+
+```csharp
+using System.Globalization;
+using KidzDev.Unity.Extensions;
+
+public static class ThaiRelativeTime
 {
-  "time_JustNow":        "เมื่อกี้นี้",
-  "time_Seconds_past":   "{0} วินาทีที่แล้ว",
-  "time_Minutes_past":   "{0} นาทีที่แล้ว",
-  "time_Hours_past":     "{0} ชั่วโมงที่แล้ว",
-  "time_Days_past":      "{0} วันที่แล้ว",
-  "time_Weeks_past":     "{0} สัปดาห์ที่แล้ว",
-  "time_Months_past":    "{0} เดือนที่แล้ว",
-  "time_Years_past":     "{0} ปีที่แล้ว",
-  "time_Seconds_future": "อีก {0} วินาที",
-  "time_Minutes_future": "อีก {0} นาที",
-  "time_Hours_future":   "อีก {0} ชั่วโมง",
-  "time_Days_future":    "อีก {0} วัน",
-  "time_Weeks_future":   "อีก {0} สัปดาห์",
-  "time_Months_future":  "อีก {0} เดือน",
-  "time_Years_future":   "อีก {0} ปี",
-  "time_Yesterday":      "เมื่อวาน",
-  "time_Tomorrow":       "พรุ่งนี้"
+    public static string Format(DateTimeOffset timestamp, DateTimeOffset? now = null)
+    {
+        var rt = timestamp.ToRelativeTime(now);
+
+        if (rt.Unit == RelativeTimeUnit.JustNow) return "เมื่อกี้นี้";
+        if (rt.Unit == RelativeTimeUnit.Days && rt.Count == 1)
+            return rt.IsFuture ? "พรุ่งนี้" : "เมื่อวาน";
+
+        string n = rt.Count.ToString(CultureInfo.InvariantCulture);
+        string unit = rt.Unit switch
+        {
+            RelativeTimeUnit.Seconds => "วินาที",
+            RelativeTimeUnit.Minutes => "นาที",
+            RelativeTimeUnit.Hours   => "ชั่วโมง",
+            RelativeTimeUnit.Days    => "วัน",
+            RelativeTimeUnit.Weeks   => "สัปดาห์",
+            RelativeTimeUnit.Months  => "เดือน",
+            _                        => "ปี",
+        };
+
+        return rt.IsFuture ? $"อีก {n} {unit}" : $"{n} {unit}ที่แล้ว";
+    }
 }
 ```
 
-The same bridge code works for all languages — only the table changes:
-
 ```csharp
-// "โพสต์เมื่อ 5 นาทีที่แล้ว"
-string label = lastPostedAt.ToRelativeTime().Unit == RelativeTimeUnit.JustNow
-    ? LocalizationSystem.GetText("time_JustNow")
-    : LocalizationSystem.GetTextFormat(
-        $"time_{rt.Unit}_{(rt.IsFuture ? "future" : "past")}", rt.Count);
-```
-
-For absolute dates, pass `new CultureInfo("th-TH")` — the BCL supplies Thai month names and
-automatically uses the Buddhist Era (BE) year (+543):
-
-```csharp
-// th-TH  →  "มิ.ย. 21, 2569"   (June 21 in BE year 2569)
-// en-US  →  "Jun 21, 2026"
-var culture = LocalizationSystem.CurrentLanguage == GameLanguage.Thai
-    ? new CultureInfo("th-TH")
-    : CultureInfo.InvariantCulture;
-
-string dateLabel = eventTime.ToFriendlyDateString(culture);
+// Results (no localization package required):
+ThaiRelativeTime.Format(DateTimeOffset.UtcNow.AddMinutes(-5));  // "5 นาทีที่แล้ว"
+ThaiRelativeTime.Format(DateTimeOffset.UtcNow.AddHours(2));     // "อีก 2 ชั่วโมง"
+ThaiRelativeTime.Format(DateTimeOffset.UtcNow.AddDays(-1));     // "เมื่อวาน"
+ThaiRelativeTime.Format(DateTimeOffset.UtcNow.AddDays(1));      // "พรุ่งนี้"
 ```
 
 **`TimeSpanExtensions`**
