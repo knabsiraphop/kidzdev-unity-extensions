@@ -174,60 +174,6 @@ string text = rt.Unit == RelativeTimeUnit.JustNow
 // key "time_Minutes_past" = "{0} minutes ago"
 ```
 
-#### Thai example — pure C# (`System.Globalization` only)
-
-**Absolute dates** — `CultureInfo` does everything: Thai month abbreviations and Buddhist Era (BE) year (+543) are built into the BCL:
-
-```csharp
-using System.Globalization;
-
-var thai = new CultureInfo("th-TH");
-
-eventTime.ToFriendlyDateString(thai);      // "มิ.ย. 21, 2569"
-eventTime.ToFriendlyDateTimeString(thai);  // "มิ.ย. 21, 2569 14:30"
-```
-
-**Relative time** — `CultureInfo` has no concept of "5 minutes ago" phrasing in any language, so you supply the Thai strings yourself. No localization package needed — a small static helper is enough:
-
-```csharp
-using System.Globalization;
-using KidzDev.Unity.Extensions;
-
-public static class ThaiRelativeTime
-{
-    public static string Format(DateTimeOffset timestamp, DateTimeOffset? now = null)
-    {
-        var rt = timestamp.ToRelativeTime(now);
-
-        if (rt.Unit == RelativeTimeUnit.JustNow) return "เมื่อกี้นี้";
-        if (rt.Unit == RelativeTimeUnit.Days && rt.Count == 1)
-            return rt.IsFuture ? "พรุ่งนี้" : "เมื่อวาน";
-
-        string n = rt.Count.ToString(CultureInfo.InvariantCulture);
-        string unit = rt.Unit switch
-        {
-            RelativeTimeUnit.Seconds => "วินาที",
-            RelativeTimeUnit.Minutes => "นาที",
-            RelativeTimeUnit.Hours   => "ชั่วโมง",
-            RelativeTimeUnit.Days    => "วัน",
-            RelativeTimeUnit.Weeks   => "สัปดาห์",
-            RelativeTimeUnit.Months  => "เดือน",
-            _                        => "ปี",
-        };
-
-        return rt.IsFuture ? $"อีก {n} {unit}" : $"{n} {unit}ที่แล้ว";
-    }
-}
-```
-
-```csharp
-// Results (no localization package required):
-ThaiRelativeTime.Format(DateTimeOffset.UtcNow.AddMinutes(-5));  // "5 นาทีที่แล้ว"
-ThaiRelativeTime.Format(DateTimeOffset.UtcNow.AddHours(2));     // "อีก 2 ชั่วโมง"
-ThaiRelativeTime.Format(DateTimeOffset.UtcNow.AddDays(-1));     // "เมื่อวาน"
-ThaiRelativeTime.Format(DateTimeOffset.UtcNow.AddDays(1));      // "พรุ่งนี้"
-```
-
 **`TimeSpanExtensions`**
 
 | Method | Description |
