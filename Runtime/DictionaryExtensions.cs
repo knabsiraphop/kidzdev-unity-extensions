@@ -44,13 +44,19 @@ namespace KidzDev.Unity.Extensions
 
         /// <summary>
         /// Adds <paramref name="amount"/> to the integer stored for <paramref name="key"/> (treating a missing
-        /// key as 0) and returns the new total. The tally / counter pattern.
+        /// key as 0) and returns the new total. The tally / counter pattern. When <paramref name="removeIfZero"/>
+        /// is <c>true</c> and the new total is exactly 0, the key is removed instead of stored.
         /// </summary>
-        public static int Increment<TKey>(this IDictionary<TKey, int> dictionary, TKey key, int amount = 1)
+        public static int Increment<TKey>(this IDictionary<TKey, int> dictionary, TKey key, int amount = 1, bool removeIfZero = false)
         {
             dictionary.TryGetValue(key, out var current);
             int updated = current + amount;
-            dictionary[key] = updated;
+
+            if (removeIfZero && updated == 0)
+                dictionary.Remove(key);
+            else
+                dictionary[key] = updated;
+
             return updated;
         }
 

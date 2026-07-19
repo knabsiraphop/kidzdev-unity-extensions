@@ -11,6 +11,7 @@ namespace KidzDev.Unity.Extensions
     public static class StringExtensions
     {
         private static readonly Regex RichTextTagPattern = new Regex("<[^>]*>");
+        private static readonly Regex NewlinePattern = new Regex("\r\n|[\r\u2028\u2029\u0085]");
 
         /// <summary>
         /// Truncates the string so its length never exceeds <paramref name="maxLength"/>, appending
@@ -162,6 +163,46 @@ namespace KidzDev.Unity.Extensions
         public static float ToFloatOrDefault(this string value, float fallback = 0f)
         {
             return float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var result) ? result : fallback;
+        }
+
+        /// <summary>
+        /// Wraps the string in a Unity / TextMeshPro rich-text <c>&lt;color&gt;</c> tag, including the
+        /// closing tag.
+        /// </summary>
+        public static string WithColor(this string value, Color color)
+        {
+            return $"<color=#{ColorUtility.ToHtmlStringRGBA(color)}>{value}</color>";
+        }
+
+        /// <summary>
+        /// Collapses every newline variant (<c>"\r\n"</c>, <c>"\r"</c>, <c>"\n"</c>, and the Unicode line
+        /// separator, paragraph separator, and next-line characters) to a single <paramref name="newline"/>
+        /// (defaults to <c>"\n"</c>). Returns the input unchanged when it is <c>null</c> or empty.
+        /// </summary>
+        public static string NormalizeNewlines(this string value, string newline = "\n")
+        {
+            if (string.IsNullOrEmpty(value))
+                return value;
+
+            return NewlinePattern.Replace(value, newline ?? string.Empty);
+        }
+
+        /// <summary>
+        /// Parses <paramref name="value"/> as <typeparamref name="TEnum"/>. Returns <c>true</c> and the parsed
+        /// value on success; otherwise <c>false</c> with <paramref name="result"/> set to <c>default</c>.
+        /// </summary>
+        public static bool TryToEnum<TEnum>(this string value, out TEnum result, bool ignoreCase = true) where TEnum : struct, Enum
+        {
+            return Enum.TryParse(value, ignoreCase, out result);
+        }
+
+        /// <summary>
+        /// Parses <paramref name="value"/> as <typeparamref name="TEnum"/>, returning <paramref name="fallback"/>
+        /// when the string is not a valid member of the enum.
+        /// </summary>
+        public static TEnum ToEnumOrDefault<TEnum>(this string value, TEnum fallback = default, bool ignoreCase = true) where TEnum : struct, Enum
+        {
+            return Enum.TryParse(value, ignoreCase, out TEnum result) ? result : fallback;
         }
 
         /// <summary>

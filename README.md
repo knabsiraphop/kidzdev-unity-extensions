@@ -1,6 +1,6 @@
 # KidzDev Unity Extensions
 
-Handy C# / Unity extension methods — strings, collections, dictionaries, numerics, date & time, and GameObjects.
+Handy C# / Unity extension methods — strings, collections, dictionaries, numerics, date & time, GameObjects, Animators, Cameras, and ScrollRects.
 
 A small, focused set of `static` extension classes you can drop into any Unity 6000.0+
 project and grow over time. Its only assembly reference is `UnityEngine.UI` (a default
@@ -15,7 +15,7 @@ Install via the Unity Package Manager using a Git URL pinned to a release tag:
 3. Enter:
 
    ```
-   https://github.com/knabsiraphop/kidzdev-unity-extensions.git#v1.1.0
+   https://github.com/knabsiraphop/kidzdev-unity-extensions.git#v1.2.0
    ```
 
 Or add it directly to `Packages/manifest.json`:
@@ -23,7 +23,7 @@ Or add it directly to `Packages/manifest.json`:
 ```json
 {
   "dependencies": {
-    "com.kidzdev.unity.extensions": "https://github.com/knabsiraphop/kidzdev-unity-extensions.git#v1.1.0"
+    "com.kidzdev.unity.extensions": "https://github.com/knabsiraphop/kidzdev-unity-extensions.git#v1.2.0"
   }
 }
 ```
@@ -52,6 +52,9 @@ All methods live in the `KidzDev.Unity.Extensions` namespace and the auto-refere
 | `TryToColor(out Color)` / `ToColor(fallback)` | Parse hex / named colour |
 | `TryToInt(out int)` / `ToIntOrDefault(fallback)` | Invariant-culture integer parse |
 | `TryToFloat(out float)` / `ToFloatOrDefault(fallback)` | Invariant-culture float parse |
+| `TryToEnum<TEnum>(out result, ignoreCase?)` / `ToEnumOrDefault<TEnum>(fallback, ignoreCase?)` | Safe enum parsing |
+| `WithColor(color)` | Wrap in a rich-text `<color>` tag |
+| `NormalizeNewlines(newline?)` | Collapse `\r\n` / `\r` / Unicode line separators to one form |
 | `GetStableHashCode()` | Deterministic FNV-1a hash — stable across runs and platforms |
 
 ---
@@ -67,9 +70,11 @@ All methods live in the `KidzDev.Unity.Extensions` namespace and the auto-refere
 | `GetRandom<T>()` | Uniform random element — throws on empty |
 | `GetRandomOrDefault<T>()` | Uniform random element — returns `default` on empty |
 | `Shuffle<T>()` | In-place Fisher–Yates using Unity's RNG |
+| `Shuffle<T>(System.Random)` | In-place Fisher–Yates using a supplied `Random` — deterministic/seeded shuffles without touching Unity's global random state |
 | `Swap<T>(int, int)` | Swap two elements by index |
 | `PopRandom<T>()` | Remove and return a random element (bag-randomiser pattern) |
 | `MinBy<T, TKey>(selector)` / `MaxBy<T, TKey>(selector)` | Min/max by key — fills the .NET 6 gap absent from Unity |
+| `FindIndex<T>(predicate)` | Index of the first match — fills the gap left by `List<T>.FindIndex` on `IEnumerable<T>` |
 
 **`DictionaryExtensions`**
 
@@ -77,7 +82,7 @@ All methods live in the `KidzDev.Unity.Extensions` namespace and the auto-refere
 |---|---|
 | `GetOrAdd(key, factory)` | Return or create-and-insert via factory |
 | `GetOrAdd(key)` | Return or create-and-insert via `new TValue()` |
-| `Increment(key, amount?)` | Counter / tally — treats missing key as 0 |
+| `Increment(key, amount?, removeIfZero?)` | Counter / tally — treats missing key as 0; when `removeIfZero` is `true` and the new total is 0, the key is removed instead of stored |
 | `AddOrUpdate(key, addValue, updateFactory)` | Insert or update with a transform |
 
 ---
@@ -92,6 +97,7 @@ All methods live in the `KidzDev.Unity.Extensions` namespace and the auto-refere
 | `IsBetween(min, max)` | Inclusive range check |
 | `ToThousandsString()` | `1234567` → `"1,234,567"` (invariant culture) |
 | `ToOrdinal()` | `1` → `"1st"`, `2` → `"2nd"`, `13` → `"13th"` |
+| `ToAbbreviatedString(decimals?)` | `1500` → `"1.5K"` compact K/M/B display formatting |
 
 **`FloatExtensions`**
 
@@ -122,6 +128,7 @@ All methods live in the `KidzDev.Unity.Extensions` namespace and the auto-refere
 | `IsBetween(min, max)` | Inclusive range check |
 | `ToThousandsString()` | Invariant-culture thousands-grouped string |
 | `ToFileSizeString()` | `1536` → `"1.5 KB"` (binary 1024-based units) |
+| `ToAbbreviatedString(decimals?)` | `1500` → `"1.5K"` compact K/M/B/T display formatting |
 | `ToDateTimeOffsetFromUnixSeconds()` | Unix seconds → `DateTimeOffset` UTC |
 | `ToDateTimeOffsetFromUnixMilliseconds()` | Unix milliseconds → `DateTimeOffset` UTC |
 
@@ -198,6 +205,41 @@ string text = rt.Unit == RelativeTimeUnit.JustNow
 | `IsInLayerMask(LayerMask)` | Safe bit-mask layer test |
 | `GetPath()` | Full hierarchy path: `"Canvas/Panel/Button"` |
 | `RefreshLayout()` | Force immediate UGUI `LayoutRebuilder` pass |
+
+---
+
+### Animator
+
+**`AnimatorExtensions`**
+
+| Method | Description |
+|---|---|
+| `RestartCurrentState(layer?)` | Replay the current state on `layer` from normalized time 0 |
+| `ResetToDefault()` | `Rebind()` + immediate `Update(0)` so the reset pose is visible without waiting a frame |
+
+---
+
+### Camera
+
+**`CameraExtensions`** — culling-mask layer helpers
+
+| Method | Description |
+|---|---|
+| `SetLayerVisible(int, bool)` / `SetLayerVisible(string, bool)` | Show or hide a layer in the camera's culling mask, by index or name |
+| `ToggleLayer(int)` / `ToggleLayer(string)` | Toggle whether a layer is included in the culling mask |
+| `IsLayerVisible(int)` | Whether a layer is included in the culling mask |
+
+---
+
+### ScrollRect
+
+**`ScrollRectExtensions`**
+
+| Method | Description |
+|---|---|
+| `ScrollVertical(delta)` / `ScrollHorizontal(delta)` | Apply a normalized delta to the scroll position, clamped to `[0, 1]` |
+| `ScrollToTop()` / `ScrollToBottom()` | Snap `verticalNormalizedPosition` to `1` / `0` |
+| `ScrollToLeft()` / `ScrollToRight()` | Snap `horizontalNormalizedPosition` to `0` / `1` |
 
 ---
 

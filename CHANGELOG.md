@@ -5,6 +5,31 @@ All notable changes to this package are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-07-19
+
+### Added
+
+- `AnimatorExtensions` (new class): `RestartCurrentState(layer = 0)` (replays the current state from
+  normalized time 0) and `ResetToDefault()` (`Rebind()` + immediate `Update(0)`).
+- `CameraExtensions` (new class): `SetLayerVisible(layer, visible)` / `SetLayerVisible(layerName, visible)`,
+  `ToggleLayer(layer)` / `ToggleLayer(layerName)`, and `IsLayerVisible(layer)` — culling-mask helpers.
+- `ScrollRectExtensions` (new class): `ScrollVertical(delta)` / `ScrollHorizontal(delta)` (clamped to
+  `[0, 1]`) and `ScrollToTop()` / `ScrollToBottom()` / `ScrollToLeft()` / `ScrollToRight()`.
+- `CollectionExtensions`: `Shuffle(this IList<T>, System.Random)` overload for deterministic/seeded
+  shuffles without touching Unity's global random state, and `FindIndex(predicate)` (fills the gap left
+  by `List<T>.FindIndex`, which isn't available on the wider `IEnumerable<T>`).
+- `StringExtensions`: `WithColor(color)` (rich-text `<color>` wrap), `NormalizeNewlines(newline = "\n")`
+  (collapses `\r\n` / `\r` / Unicode line separators to one form), and `TryToEnum<TEnum>(out result)` /
+  `ToEnumOrDefault<TEnum>(fallback)` (safe enum parsing, matching the existing `TryToInt`/`ToIntOrDefault`
+  shape).
+- `LongExtensions.ToAbbreviatedString(decimals = 1)` and `IntExtensions.ToAbbreviatedString(decimals = 1)`:
+  compact K / M / B / T display formatting (e.g. `1500` → `"1.5K"`).
+
+### Changed
+
+- `DictionaryExtensions.Increment` gains an optional `removeIfZero` parameter — when `true` and the
+  updated total is exactly 0, the key is removed instead of stored at 0.
+
 ## [1.1.0] - 2026-06-21
 
 ### Added

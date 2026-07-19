@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using KidzDev.Unity.Extensions;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace KidzDev.Unity.Extensions.Samples
 {
@@ -14,6 +15,8 @@ namespace KidzDev.Unity.Extensions.Samples
     /// </summary>
     public class ExtensionsDemo : MonoBehaviour
     {
+        private enum SampleEnum { Alpha, Beta, Gamma }
+
         private readonly List<string> _output      = new List<string>();
         private readonly List<string> _outputRight = new List<string>();
         private Vector2 _scroll;
@@ -30,6 +33,9 @@ namespace KidzDev.Unity.Extensions.Samples
             LongSamples();
             DateTimeOffsetSamples();
             TimeSpanSamples();
+            AnimatorSamples();
+            CameraSamples();
+            ScrollRectSamples();
             yield return GameObjectSamples();
         }
 
@@ -62,6 +68,13 @@ namespace KidzDev.Unity.Extensions.Samples
             Log("\"#nope\".ToColor(Color.black)", "#" + ColorUtility.ToHtmlStringRGB("#nope".ToColor(Color.black)));
 
             Log("\"save_slot_1\".GetStableHashCode()", "save_slot_1".GetStableHashCode());
+
+            Log("\"Danger\".WithColor(Color.red)", "Danger".WithColor(Color.red));
+            Log("\"a\\r\\nb\\rc\".NormalizeNewlines()", "a\r\nb\rc".NormalizeNewlines().Replace("\n", "\\n"));
+
+            bool enumOk = "beta".TryToEnum(out SampleEnum parsedEnum);
+            Log("\"beta\".TryToEnum(out SampleEnum e)", $"{enumOk} (e={parsedEnum})");
+            Log("\"nope\".ToEnumOrDefault(SampleEnum.Gamma)", "nope".ToEnumOrDefault(SampleEnum.Gamma));
         }
 
         // ── collections ─────────────────────────────────────────────────────
@@ -93,6 +106,13 @@ namespace KidzDev.Unity.Extensions.Samples
             var words = new[] { "addressable", "io", "scope" };
             Log("words.MinBy(w => w.Length)", words.MinBy(w => w.Length));
             Log("words.MaxBy(w => w.Length)", words.MaxBy(w => w.Length));
+
+            var seededShuffle = new List<int>(nums);
+            seededShuffle.Shuffle(new System.Random(42));
+            Log("nums.Shuffle(new Random(42))", string.Join(",", seededShuffle));
+
+            Log("nums.FindIndex(n => n > 25)", nums.FindIndex(n => n > 25));
+            Log("nums.FindIndex(n => n > 999)", nums.FindIndex(n => n > 999));
         }
 
         // ── dictionaries ────────────────────────────────────────────────────
@@ -116,6 +136,10 @@ namespace KidzDev.Unity.Extensions.Samples
 
             scores.AddOrUpdate("p1", 1, (_, v) => v + 10);
             Log("scores.AddOrUpdate(\"p1\", 1, +10)", scores["p1"]);
+
+            var stacks = new Dictionary<string, int> { ["buff"] = 3 };
+            stacks.Increment("buff", -3, removeIfZero: true);
+            Log("stacks.Increment(\"buff\", -3, removeIfZero:true)", stacks.ContainsKey("buff") ? "still present" : "removed");
         }
 
         // ── int ─────────────────────────────────────────────────────────────
@@ -130,6 +154,8 @@ namespace KidzDev.Unity.Extensions.Samples
             Log("(1234567).ToThousandsString()", (1234567).ToThousandsString());
             Log("(22).ToOrdinal()", (22).ToOrdinal());
             Log("(13).ToOrdinal()", (13).ToOrdinal());
+            Log("(1500).ToAbbreviatedString()", (1500).ToAbbreviatedString());
+            Log("(2500000).ToAbbreviatedString(0)", (2500000).ToAbbreviatedString(0));
         }
 
         // ── float ───────────────────────────────────────────────────────────
@@ -174,6 +200,9 @@ namespace KidzDev.Unity.Extensions.Samples
             Log("(5L<<30).ToFileSizeString()", (5L << 30).ToFileSizeString());
             Log("1_750_000_000L.ToDateTimeOffsetFromUnixSeconds()", 1_750_000_000L.ToDateTimeOffsetFromUnixSeconds().ToIso8601String());
             Log("1_750_000_000_000L.ToDateTimeOffsetFromUnixMilliseconds()", 1_750_000_000_000L.ToDateTimeOffsetFromUnixMilliseconds().ToIso8601String());
+            Log("1_234_567_890L.ToAbbreviatedString()", 1_234_567_890L.ToAbbreviatedString());
+            Log("(-2500L).ToAbbreviatedString(0)", (-2500L).ToAbbreviatedString(0));
+            Log("0L.ToAbbreviatedString()", 0L.ToAbbreviatedString());
         }
 
         // ── DateTimeOffset ──────────────────────────────────────────────────
@@ -249,6 +278,91 @@ namespace KidzDev.Unity.Extensions.Samples
             SectionRight("— Range");
             LogRight("(2m 30s).Clamp(1m, 5m)", underHour.Clamp(TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(5)).ToCompactString());
             LogRight("(2m 30s).IsBetween(1m, 5m)", underHour.IsBetween(TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(5)));
+        }
+
+        // ── Animator ────────────────────────────────────────────────────────
+
+        private void AnimatorSamples()
+        {
+            Section("AnimatorExtensions");
+
+            var animatorGo = new GameObject("SampleAnimator", typeof(Animator));
+            animatorGo.transform.SetParent(transform);
+            var animator = animatorGo.GetComponent<Animator>();
+
+            animator.ResetToDefault();
+            Log("animator.ResetToDefault()", "ok (no exception)");
+
+            animator.RestartCurrentState();
+            Log("animator.RestartCurrentState() (no controller)", "no-op, ok");
+        }
+
+        // ── Camera ──────────────────────────────────────────────────────────
+
+        private void CameraSamples()
+        {
+            Section("CameraExtensions");
+
+            var cameraGo = new GameObject("SampleCamera", typeof(Camera));
+            cameraGo.transform.SetParent(transform);
+            var camera = cameraGo.GetComponent<Camera>();
+
+            camera.SetLayerVisible(0, false);
+            Log("camera.SetLayerVisible(0, false)", camera.IsLayerVisible(0));
+
+            camera.SetLayerVisible(0, true);
+            Log("camera.SetLayerVisible(0, true)", camera.IsLayerVisible(0));
+
+            camera.ToggleLayer(0);
+            Log("camera.ToggleLayer(0)", camera.IsLayerVisible(0));
+
+            camera.SetLayerVisible("NoSuchLayer", true);
+            Log("camera.SetLayerVisible(\"NoSuchLayer\", true)", "no-op, ok");
+
+            camera.ToggleLayer("Default");
+            Log("camera.ToggleLayer(\"Default\")", camera.IsLayerVisible(0));
+        }
+
+        // ── ScrollRect ──────────────────────────────────────────────────────
+
+        private void ScrollRectSamples()
+        {
+            Section("ScrollRectExtensions");
+
+            var scrollGo = new GameObject("SampleScrollRect", typeof(RectTransform), typeof(ScrollRect));
+            scrollGo.transform.SetParent(transform, false);
+            var viewportRect = (RectTransform)scrollGo.transform;
+            viewportRect.sizeDelta = new Vector2(200f, 200f);
+            var scrollRect = scrollGo.GetComponent<ScrollRect>();
+
+            // Content must be larger than the viewport in both axes for normalized-position math to
+            // have a real range to work with (an equal-size content always reports position 0).
+            var content = new GameObject("Content", typeof(RectTransform));
+            var contentRect = (RectTransform)content.transform;
+            contentRect.SetParent(scrollGo.transform, false);
+            contentRect.anchorMin = new Vector2(0f, 1f);
+            contentRect.anchorMax = new Vector2(0f, 1f);
+            contentRect.pivot = new Vector2(0f, 1f);
+            contentRect.sizeDelta = new Vector2(600f, 600f);
+            scrollRect.content = contentRect;
+
+            scrollRect.ScrollToBottom();
+            Log("scrollRect.ScrollToBottom()", scrollRect.verticalNormalizedPosition);
+
+            scrollRect.ScrollVertical(1.5f);
+            Log("scrollRect.ScrollVertical(1.5) (clamped)", scrollRect.verticalNormalizedPosition);
+
+            scrollRect.ScrollToLeft();
+            Log("scrollRect.ScrollToLeft()", scrollRect.horizontalNormalizedPosition);
+
+            scrollRect.ScrollHorizontal(-0.5f);
+            Log("scrollRect.ScrollHorizontal(-0.5) (clamped)", scrollRect.horizontalNormalizedPosition);
+
+            scrollRect.ScrollToTop();
+            Log("scrollRect.ScrollToTop()", scrollRect.verticalNormalizedPosition);
+
+            scrollRect.ScrollToRight();
+            Log("scrollRect.ScrollToRight()", scrollRect.horizontalNormalizedPosition);
         }
 
         // ── GameObject ──────────────────────────────────────────────────────

@@ -65,6 +65,48 @@ namespace KidzDev.Unity.Extensions
         }
 
         /// <summary>
+        /// Shuffles the list in place using the Fisher–Yates algorithm and the supplied <paramref name="random"/>
+        /// instead of Unity's global random generator — use this for deterministic/seeded shuffles (tests,
+        /// replays) without disturbing global random state. Does nothing when the list is <c>null</c>.
+        /// </summary>
+        public static void Shuffle<T>(this IList<T> list, Random random)
+        {
+            if (list == null)
+                return;
+            if (random == null)
+                throw new ArgumentNullException(nameof(random));
+
+            for (int i = list.Count - 1; i > 0; i--)
+            {
+                int j = random.Next(i + 1);
+                (list[i], list[j]) = (list[j], list[i]);
+            }
+        }
+
+        /// <summary>
+        /// Returns the index of the first element matching <paramref name="predicate"/>, or <c>-1</c> when none
+        /// match. Fills the gap left by <see cref="List{T}.FindIndex(Predicate{T})"/>, which only exists on
+        /// <see cref="List{T}"/> and not on the wider <see cref="IEnumerable{T}"/>.
+        /// </summary>
+        public static int FindIndex<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+            if (predicate == null)
+                throw new ArgumentNullException(nameof(predicate));
+
+            int index = 0;
+            foreach (T item in source)
+            {
+                if (predicate(item))
+                    return index;
+                index++;
+            }
+
+            return -1;
+        }
+
+        /// <summary>
         /// Swaps the elements at <paramref name="a"/> and <paramref name="b"/> in place. Throws
         /// <see cref="ArgumentNullException"/> for a null list and <see cref="ArgumentOutOfRangeException"/>
         /// when either index is out of range.

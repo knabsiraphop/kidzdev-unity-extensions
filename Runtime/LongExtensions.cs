@@ -54,6 +54,35 @@ namespace KidzDev.Unity.Extensions
         }
 
         /// <summary>
+        /// Formats the value as a compact display string using K / M / B / T suffixes at the 1e3 / 1e6 / 1e9 /
+        /// 1e12 thresholds (e.g. <c>1500</c> → <c>"1.5K"</c>, <c>2000000</c> → <c>"2M"</c>), keeping up to
+        /// <paramref name="decimals"/> fractional digits with trailing zeros trimmed. Values below 1000 are
+        /// returned as plain digits. Negative values are formatted by magnitude with a leading <c>"-"</c>.
+        /// Uses the invariant culture.
+        /// </summary>
+        public static string ToAbbreviatedString(this long value, int decimals = 1)
+        {
+            bool negative = value < 0;
+            double magnitude = negative ? -(double)value : value;
+
+            string suffix;
+            double scale;
+
+            if (magnitude >= 1_000_000_000_000d) { suffix = "T"; scale = 1_000_000_000_000d; }
+            else if (magnitude >= 1_000_000_000d) { suffix = "B"; scale = 1_000_000_000d; }
+            else if (magnitude >= 1_000_000d) { suffix = "M"; scale = 1_000_000d; }
+            else if (magnitude >= 1_000d) { suffix = "K"; scale = 1_000d; }
+            else
+                return value.ToString(CultureInfo.InvariantCulture);
+
+            int fractionDigits = Math.Max(0, decimals);
+            string format = fractionDigits == 0 ? "0" : "0." + new string('#', fractionDigits);
+            string formatted = (magnitude / scale).ToString(format, CultureInfo.InvariantCulture);
+
+            return (negative ? "-" : string.Empty) + formatted + suffix;
+        }
+
+        /// <summary>
         /// Converts a Unix timestamp (seconds since 1970-01-01T00:00:00Z) to a
         /// <see cref="DateTimeOffset"/> in UTC. The reverse — <c>dto.ToUnixTimeSeconds()</c>
         /// — is already a first-class BCL method on <see cref="DateTimeOffset"/>.

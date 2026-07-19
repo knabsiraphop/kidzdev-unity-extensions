@@ -38,6 +38,15 @@ namespace KidzDev.Unity.Extensions
         }
 
         /// <summary>
+        /// Formats the value as a compact display string using K / M / B suffixes. See
+        /// <see cref="LongExtensions.ToAbbreviatedString(long, int)"/> for the full formatting rules.
+        /// </summary>
+        public static string ToAbbreviatedString(this int value, int decimals = 1)
+        {
+            return ((long)value).ToAbbreviatedString(decimals);
+        }
+
+        /// <summary>
         /// Returns the value with its English ordinal suffix appended — <c>1</c> → <c>"1st"</c>,
         /// <c>2</c> → <c>"2nd"</c>, <c>13</c> → <c>"13th"</c>. Formatted with the invariant culture.
         /// </summary>
